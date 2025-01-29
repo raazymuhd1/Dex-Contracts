@@ -7,6 +7,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { TransferHelper } from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
 contract BaseSwap {
+    // errors
     error BaseSwap_InvalidCaller(address caller);
     error BaseSwap_NotEnoughAmt(uint256 amount);
     error BaseSwap_InvalidRecipient(address rec);
@@ -40,7 +41,6 @@ contract BaseSwap {
         address recipient;
         uint256 deadline;
         uint256 amountIn;
-        uint256 amountOutMin;
         uint24 slippageTolerance;
     }
 
@@ -52,7 +52,6 @@ contract BaseSwap {
         address recipient;
         uint256 deadline;
         uint256 amountOut;
-        uint256 amountInMax;
         uint24 slippageTolerance;
     }
 
@@ -139,8 +138,11 @@ contract BaseSwap {
         emit ExactInputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }
 
-
-    function updateSwapConfig(address newRouter_, address newQuoter_) internal returns(address, address) {
+    /**
+        @dev updating the swap router, and quoter
+        @notice can only be called by its child
+     */
+    function _updateSwapConfig(address newRouter_, address newQuoter_) internal returns(address, address) {
           s_swapRouter = ISwapRouter(newRouter_);
           s_quoter = IQuoter(newQuoter_);
 
