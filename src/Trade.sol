@@ -88,7 +88,7 @@ contract Trade is Base, Ownable {
 
     /**
         @dev calling for router & quoter update
-        @param routerNew - an address of a new router
+        @param routerNew_ - an address of a new router
         @param quoterNew_ - an address of a new quoter
      */
      function updateConfig(address routerNew_, address quoterNew_) external onlyOwner returns(address, address) {

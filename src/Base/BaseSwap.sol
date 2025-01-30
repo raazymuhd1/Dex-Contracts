@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+/**
+    @notice A Base contract for swap functionalities, other contracts could inherits from this Base Contract
+    @notice this contract uses a UniswapV3 Router contract 
+ */
+
 import { ISwapRouter } from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import { IQuoter } from "@uniswap/v3-periphery/contracts/interfaces/IQuoter.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -116,11 +121,12 @@ contract BaseSwap {
        InvalidRecipient(params.recipient) returns(uint256 inAmount) {
         // path in reverse order for exactOutput
         bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.hopToken, params.swapFee, params.tokenIn);
-
+        // quote a swap
         uint256 maxInAmount = s_quoter.quoteExactOutput(path, params.amountOut);
+        // token transfer & approval
         params.tokenIn.safeTransferFrom(msg.sender, address(this), maxInAmount);
         params.tokenIn.safeApprove(address(s_swapRouter), maxInAmount);
-
+        // swap params
         ISwapRouter.ExactOutputParams memory swapParams = ISwapRouter.ExactOutputParams({
             path: path,
             recipient: params.recipient,
@@ -128,14 +134,17 @@ contract BaseSwap {
             amountOut: params.amountOut,
             amountInMaximum: maxInAmount
         });
-
-        inAmount = s_swapRouter.exactOutput(swapParams);
+        // calling for swap
+        inAmount = s_swapRouter.exactOutput(swapParams);    
+        // slippage tolerance handler
+        uint256 slippageTol = (maxInAmount * (SLIPPAGE_PERCENTAGE - params.slippageTolerance)) / 100;
+        if(inAmount > slippageTol) revert BaseSwap_SlippageExceeded(maxInAmount);
         if(inAmount < maxInAmount) {
             // if the amountIn is less than maxAmountIn require by router, then approve router to spend 0, and refund the amountIn to user
             params.tokenIn.safeApprove(address(s_swapRouter), 0);
             params.tokenIn.safeTransferFrom(address(this), params.recipient, maxInAmount - inAmount);
         }
-        emit ExactInputSwapped(params.recipient, params.tokenIn, params.tokenOut);
+        emit ExactOutputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }
 
     /**
