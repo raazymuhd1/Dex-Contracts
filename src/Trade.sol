@@ -18,7 +18,7 @@ contract Trade is Base, Ownable {
     uint256 private constant DECIMALS18 = 1e18;
     uint256 private constant DECIMALS6 = 1e6;
     uint24 private constant POOL_FEE = 3000; // 0.3%
-    address private constant HOP_TOKEN = address(0);
+    address private constant HOP_TOKEN = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     
 
     // ---------------------------------------- EVENTS ---------------------------------------

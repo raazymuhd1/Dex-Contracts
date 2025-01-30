@@ -7,7 +7,7 @@ pragma solidity ^0.8.20;
  */
 
 import { ISwapRouter } from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import { IQuoter } from "@uniswap/v3-periphery/contracts/interfaces/IQuoter.sol";
+import { IQuoterV2 } from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { TransferHelper } from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
@@ -23,7 +23,7 @@ contract BaseSwap {
     using TransferHelper for address;
 
     ISwapRouter private s_swapRouter;
-    IQuoter public s_quoter;
+    IQuoterV2 public s_quoter;
 
     uint256 private constant SLIPPAGE_PERCENTAGE = 100;
 
@@ -33,7 +33,7 @@ contract BaseSwap {
 
     constructor(address router_, address quoter_) {
         s_swapRouter = ISwapRouter(router_);
-        s_quoter = IQuoter(quoter_);
+        s_quoter = IQuoterV2(quoter_);
     }
 
     // ------------------------------------------------------- STRUCTS ------------------------------------------
@@ -90,7 +90,7 @@ contract BaseSwap {
         params.tokenIn.safeTransferFrom(msg.sender, address(this), params.amountIn);
         params.tokenIn.safeApprove(address(s_swapRouter), params.amountIn);
 
-        uint256 expectedAmt = s_quoter.quoteExactInput(path, params.amountIn);
+       ( uint256 expectedAmt, , ,) = s_quoter.quoteExactInput(path, params.amountIn);
         ISwapRouter.ExactInputParams memory swapParams = ISwapRouter.ExactInputParams({
             path: path,
             recipient: params.recipient,
@@ -122,7 +122,7 @@ contract BaseSwap {
         // path in reverse order for exactOutput
         bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.hopToken, params.swapFee, params.tokenIn);
         // quote a swap
-        uint256 maxInAmount = s_quoter.quoteExactOutput(path, params.amountOut);
+        (uint256 maxInAmount, , ,) = s_quoter.quoteExactOutput(path, params.amountOut);
         // token transfer & approval
         params.tokenIn.safeTransferFrom(msg.sender, address(this), maxInAmount);
         params.tokenIn.safeApprove(address(s_swapRouter), maxInAmount);
@@ -153,7 +153,7 @@ contract BaseSwap {
      */
     function _updateSwapConfig(address newRouter_, address newQuoter_) internal returns(address, address) {
           s_swapRouter = ISwapRouter(newRouter_);
-          s_quoter = IQuoter(newQuoter_);
+          s_quoter = IQuoterV2(newQuoter_);
 
          return (newRouter_, newQuoter_);
     }

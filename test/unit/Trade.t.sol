@@ -11,22 +11,24 @@ contract TradeTest is Test {
 
     address quoter = 0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a;
     address router = 0x2626664c2603336E57B271c5C0b26F421741e481;
-    address USDT = makeAddr("USDT");
-    address WETH = makeAddr("USDT");
-    address USER = makeAddr("USER");
+    address USDT = 0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2;
+    address USDC = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
+    address USER = 0x3a92f10694f38f2bea6A3794c3bD06880572Dc1f;
 
     function setUp() public {
-        trade = new Trade(quoter, router);
+        trade = new Trade(router, quoter);
     }
 
     function test_exactInputSwap() public {
         uint256 amountIn = 5e6;
         uint24 slippage = 5; 
 
-        Trade.SwapExactInputParams memory params = Trade.SwapExactInputParams(USDT, WETH, amountIn, slippage);
+        vm.startPrank(USER);
+        Trade.SwapExactInputParams memory params = Trade.SwapExactInputParams(USDT, USDC, amountIn, slippage);
         // approving contract
         IERC20(USDT).approve(address(trade), amountIn);
         trade.swapExactInput(params);
+        vm.stopPrank();
 
         console.log("swapped");
     }
