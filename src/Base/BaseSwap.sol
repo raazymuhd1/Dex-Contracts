@@ -6,7 +6,7 @@ pragma solidity ^0.8.20;
     @notice this contract uses a UniswapV3 Router contract 
  */
 
-import { ISwapRouter } from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import { ISwapRouterV2 } from "../interfaces/ISwapRouterV2.sol";
 import { IQuoterV2 } from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { TransferHelper } from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
@@ -22,7 +22,7 @@ contract BaseSwap {
     // using TransferHelper libs from uniswap for safe transfering
     using TransferHelper for address;
 
-    ISwapRouter private s_swapRouter;
+    ISwapRouterV2 private s_swapRouter;
     IQuoterV2 public s_quoter;
 
     uint256 private constant SLIPPAGE_PERCENTAGE = 100;
@@ -32,7 +32,7 @@ contract BaseSwap {
      event ExactOutputSwapped(address indexed recipient, address indexed tokenIn, address indexed tokenOut);
 
     constructor(address router_, address quoter_) {
-        s_swapRouter = ISwapRouter(router_);
+        s_swapRouter = ISwapRouterV2(router_);
         s_quoter = IQuoterV2(quoter_);
     }
 
@@ -85,16 +85,16 @@ contract BaseSwap {
        ValidCaller 
        InvalidPair(params.tokenIn, params.hopToken, params.tokenOut) 
        InvalidRecipient(params.recipient) returns(uint256 actualAmt) {
-        bytes memory path = abi.encodePacked(params.tokenIn, params.swapFee, params.hopToken, params.swapFee, params.tokenOut);
+
+        bytes memory path = abi.encodePacked(params.tokenIn, params.swapFee, params.tokenOut);
         if(params.amountIn <= 0) revert BaseSwap_NotEnoughAmt(params.amountIn);
         params.tokenIn.safeTransferFrom(msg.sender, address(this), params.amountIn);
         params.tokenIn.safeApprove(address(s_swapRouter), params.amountIn);
 
        ( uint256 expectedAmt, , ,) = s_quoter.quoteExactInput(path, params.amountIn);
-        ISwapRouter.ExactInputParams memory swapParams = ISwapRouter.ExactInputParams({
+        ISwapRouterV2.ExactInputParams memory swapParams = ISwapRouterV2.ExactInputParams({
             path: path,
             recipient: params.recipient,
-            deadline: params.deadline,
             amountIn: params.amountIn,
             amountOutMinimum: expectedAmt
         });
@@ -127,10 +127,9 @@ contract BaseSwap {
         params.tokenIn.safeTransferFrom(msg.sender, address(this), maxInAmount);
         params.tokenIn.safeApprove(address(s_swapRouter), maxInAmount);
         // swap params
-        ISwapRouter.ExactOutputParams memory swapParams = ISwapRouter.ExactOutputParams({
+        ISwapRouterV2.ExactOutputParams memory swapParams = ISwapRouterV2.ExactOutputParams({
             path: path,
             recipient: params.recipient,
-            deadline: params.deadline,
             amountOut: params.amountOut,
             amountInMaximum: maxInAmount
         });
@@ -152,7 +151,7 @@ contract BaseSwap {
         @notice can only be called by its child
      */
     function _updateSwapConfig(address newRouter_, address newQuoter_) internal returns(address, address) {
-          s_swapRouter = ISwapRouter(newRouter_);
+          s_swapRouter = ISwapRouterV2(newRouter_);
           s_quoter = IQuoterV2(newQuoter_);
 
          return (newRouter_, newQuoter_);
