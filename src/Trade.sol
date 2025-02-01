@@ -69,7 +69,6 @@ contract Trade is Base, Ownable {
             HOP_TOKEN,
             POOL_FEE,
             msg.sender,
-            block.timestamp,
             params.amtIn,
             params.slippageTolerance
          );

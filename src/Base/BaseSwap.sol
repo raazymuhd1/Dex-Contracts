@@ -44,7 +44,6 @@ contract BaseSwap {
         address hopToken;
         uint24 swapFee;
         address recipient;
-        uint256 deadline;
         uint256 amountIn;
         uint24 slippageTolerance;
     }
@@ -55,7 +54,6 @@ contract BaseSwap {
         address hopToken;
         uint24 swapFee;
         address recipient;
-        uint256 deadline;
         uint256 amountOut;
         uint24 slippageTolerance;
     }
@@ -105,6 +103,7 @@ contract BaseSwap {
         // another word, if the outAmount is 1% (whetever slippage tolerance percentage user select) less than the expected OutAmount, revert the tx. 
         uint256 slippageTol = (expectedAmt * (SLIPPAGE_PERCENTAGE - params.slippageTolerance)) / 100; 
 
+        if(expectedAmt < slippageTol) revert("slippage tolerance exceeded");
         // if user gets less than the slippage tolerance, then revert the tx
         if(actualAmt < expectedAmt) revert BaseSwap_SlippageExceeded(actualAmt);
         emit ExactInputSwapped(params.recipient, params.tokenIn, params.tokenOut);
