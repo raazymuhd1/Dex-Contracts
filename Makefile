@@ -1,3 +1,4 @@
 include .env
 
-test-exact-input:; forge test --mt test_exactInputSwap --fork-url $(BASE_MAINNET_RPC) -vvvvv
+bridge_erc20l1:; forge test --mt test_bridgeErc20FromL1 --fork-url MAINNET_RPC -vvvvv
+

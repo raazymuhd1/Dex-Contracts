@@ -8,8 +8,10 @@ remappings = [
     "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/src/",
     "@uniswap/v3-core/contracts/=lib/v3-core/contracts/", 
     "@uniswap/v3-periphery/contracts/=lib/v3-periphery/contracts/",
-    "@openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
     "@wormhole-contracts/=lib/wormhole/ethereum/contracts/",
+    "@scroll/contracts/=lib/scroll-contracts/src/"
     ]
 
 
