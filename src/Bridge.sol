@@ -5,15 +5,25 @@ import { BaseTokenBridge } from "./base/BaseTokenBridge.sol";
 
 contract Bridge is BaseTokenBridge {
     
-    constructor(address l1GatewayRouter_) BaseTokenBridge(l1GatewayRouter_) {
+    constructor(address l1GatewayRouter_, address l2GatewayRouter_) BaseTokenBridge(l1GatewayRouter_, l2GatewayRouter_) {
 
     }
 
-    function erc20BridgeL1(address token, uint256 amount, uint256 gasLimit) external payable returns(bool, uint256) {
-        bridgeERC20L1(
+    function erc20BridgeL2(address token, uint256 amount, uint256 gasLimit, address to) external payable returns(bool, uint256) {
+        bridgeERC20ToL2(
             token,
             amount,
-            gasLimit
+            gasLimit,
+            to
+        );
+    }
+
+    function erc20BridgeToL1(address token, uint256 amount, uint256 gasLimit, address to) external payable returns(bool, uint256) {
+        bridgeERC20ToL1(
+            token,
+            amount,
+            gasLimit,
+            to
         );
     }
 
