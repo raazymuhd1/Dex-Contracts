@@ -100,7 +100,16 @@ contract YoloTrade is Base, Ownable {
         @dev performing a swap for an exact Output amount of tokenOut
      */
     function swapExactOutput(SwapExactOutputParams calldata params) external ValidCaller OnlyIfNotPaused returns(uint256 amtOut) {
-        
+        Base.ParamExactOutput memory swapParams = Base.ParamExactOutput(
+            params.tokenIn,
+            params.tokenOut,
+            POOL_FEE,
+            msg.sender,
+            params.amtOut,
+            params.slippageTolerance
+        );
+
+        exactOutputSwap(swapParams);
     }
 
     /**

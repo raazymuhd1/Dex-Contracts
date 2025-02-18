@@ -4,16 +4,19 @@ pragma solidity ^0.8.20;
 import { Test, console } from "forge-std/Test.sol";
 import { YoloTrade } from "../../src/YoloTrade.sol";
 import { IUniswapV3Factory } from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+import { IQuoterV2 } from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TradeTest is Test {
 
     YoloTrade trade;
+    IQuoterV2 quoter_v2;
     IUniswapV3Factory poolFactory;
 
     address quoter = 0x61fFE014bA17989E743c5F6cB21bF9697530B21e;
     address router = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
     address pool_factory = 0x1F98431c8aD98523631AE4a59f267346ea31F984 ;
+    uint256 POOL_FEE = 3000;
     address USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     address USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -25,6 +28,7 @@ contract TradeTest is Test {
     function setUp() public {
         trade = new YoloTrade(router, quoter);
         poolFactory = IUniswapV3Factory(pool_factory);
+        quoter_v2 = IQuoterV2(quoter);
 
         uint256 userBal = IERC20(USDT).balanceOf(USER);
         console.log("balance of ", USDT, USER);
@@ -42,6 +46,25 @@ contract TradeTest is Test {
         vm.stopPrank();
 
         console.log("swapped");
+    }
+
+    function test_exactOutputSwap() public {
+        uint256 outAmt = 3e5;
+        uint24 slippageTol = 2;
+        vm.startPrank(USER);
+        YoloTrade.SwapExactOutputParams memory params = YoloTrade.SwapExactOutputParams(
+            DAI,
+            WBTC,
+            outAmt,
+            slippageTol
+        );
+         bytes memory path = abi.encodePacked(params.tokenOut, POOL_FEE, params.tokenIn);
+        (uint256 maxAmtIn, , , ) = quoter_v2.quoteExactOutput(path, outAmt);
+        IERC20(params.tokenIn).approve(address(trade), maxAmtIn);
+        uint256 inAmt = trade.swapExactOutput(params);
+        vm.stopPrank();
+
+        console.log("amountIN", inAmt);
     }
 
     function test_gettingPool() public {

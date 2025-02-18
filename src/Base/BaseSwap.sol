@@ -114,7 +114,7 @@ contract BaseSwap {
        ValidCaller 
        InvalidPair(params.tokenIn, params.tokenOut) 
        InvalidRecipient(params.recipient) returns(uint256 inAmount) {
-        // path in reverse order for exactOutput
+        // path in reversed order for exactOutput
         bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.tokenIn);
         // quote a swap
         (uint256 maxInAmount, , ,) = s_quoter.quoteExactOutput(path, params.amountOut);
@@ -134,7 +134,7 @@ contract BaseSwap {
         uint256 slippageTol = (maxInAmount * (SLIPPAGE_PERCENTAGE - params.slippageTolerance)) / 100;
         if(inAmount > slippageTol) revert BaseSwap_SlippageExceeded(maxInAmount);
         if(inAmount < maxInAmount) {
-            // if the amountIn is less than maxAmountIn require by router, then approve router to spend 0, and refund the amountIn to user
+            // if the amountIn is less than maxAmountIn required by router, then approved the router to spend 0, and refund the amountIn to user
             TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), 0);
             TransferHelper.safeTransferFrom(params.tokenIn, address(this), params.recipient, maxInAmount - inAmount);
         }
