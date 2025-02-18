@@ -17,15 +17,13 @@ contract BaseSwap {
     error BaseSwap_NotEnoughAmt(uint256 amount);
     error BaseSwap_InvalidRecipient(address rec);
     error BaseSwap_AmountLessThanExpected(uint256 amt, uint256 expectedAmt);
-    error BaseSwap_InvalidPair(address tokenA, address hopToken, address tokenB);
+    error BaseSwap_InvalidPair(address tokenA, address tokenB);
     error BaseSwap_SlippageExceeded(uint256 amountOut);
-    // using TransferHelper libs from uniswap for safe transfering
-    using TransferHelper for address;
 
     ISwapRouterV2 private s_swapRouter;
     IQuoterV2 public s_quoter;
 
-    uint256 private constant SLIPPAGE_PERCENTAGE = 100;
+    uint256 private constant SLIPPAGE_PERCENTAGE = 100; // 100%
 
      // ------------------------------------------------------- EVENTS ------------------------------------------
      event ExactInputSwapped(address indexed recipient, address indexed tokenIn, address indexed tokenOut);
@@ -41,7 +39,6 @@ contract BaseSwap {
     struct ParamExactInput {
         address tokenIn;
         address tokenOut;
-        address hopToken;
         uint24 swapFee;
         address recipient;
         uint256 amountIn;
@@ -51,7 +48,6 @@ contract BaseSwap {
     struct ParamExactOutput {
         address tokenIn;
         address tokenOut;
-        address hopToken;
         uint24 swapFee;
         address recipient;
         uint256 amountOut;
@@ -69,8 +65,8 @@ contract BaseSwap {
         _;
     } 
 
-    modifier InvalidPair(address tokenA, address hopToken, address tokenB) {
-        if(tokenA == address(0) || tokenB == address(0)) revert BaseSwap_InvalidPair(tokenA, hopToken, tokenB);
+    modifier InvalidPair(address tokenA, address tokenB) {
+        if(tokenA == address(0) || tokenB == address(0)) revert BaseSwap_InvalidPair(tokenA, tokenB);
         _;
     } 
 
@@ -81,13 +77,13 @@ contract BaseSwap {
      */
     function exactInputSwap(ParamExactInput memory params) internal 
        ValidCaller 
-       InvalidPair(params.tokenIn, params.hopToken, params.tokenOut) 
+       InvalidPair(params.tokenIn, params.tokenOut) 
        InvalidRecipient(params.recipient) returns(uint256 actualAmt) {
 
         bytes memory path = abi.encodePacked(params.tokenIn, params.swapFee, params.tokenOut);
         if(params.amountIn <= 0) revert BaseSwap_NotEnoughAmt(params.amountIn);
-        params.tokenIn.safeTransferFrom(msg.sender, address(this), params.amountIn);
-        params.tokenIn.safeApprove(address(s_swapRouter), params.amountIn);
+        TransferHelper.safeTransferFrom(params.tokenIn, msg.sender, address(this), params.amountIn);
+        TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), params.amountIn);
 
        ( uint256 expectedAmt, , ,) = s_quoter.quoteExactInput(path, params.amountIn);
         ISwapRouterV2.ExactInputParams memory swapParams = ISwapRouterV2.ExactInputParams({
@@ -103,9 +99,9 @@ contract BaseSwap {
         // another word, if the outAmount is 1% (whetever slippage tolerance percentage user select) less than the expected OutAmount, revert the tx. 
         uint256 slippageTol = (expectedAmt * (SLIPPAGE_PERCENTAGE - params.slippageTolerance)) / 100; 
 
-        if(expectedAmt < slippageTol) revert("slippage tolerance exceeded");
+        if(actualAmt < slippageTol) revert("slippage tolerance exceeded");
         // if user gets less than the slippage tolerance, then revert the tx
-        if(actualAmt < expectedAmt) revert BaseSwap_SlippageExceeded(actualAmt);
+        // if(actualAmt < expectedAmt) revert BaseSwap_SlippageExceeded(actualAmt);
         emit ExactInputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }
 
@@ -116,15 +112,15 @@ contract BaseSwap {
      */
     function exactOutputSwap(ParamExactOutput memory params) internal 
        ValidCaller 
-       InvalidPair(params.tokenIn, params.hopToken, params.tokenOut) 
+       InvalidPair(params.tokenIn, params.tokenOut) 
        InvalidRecipient(params.recipient) returns(uint256 inAmount) {
         // path in reverse order for exactOutput
-        bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.hopToken, params.swapFee, params.tokenIn);
+        bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.tokenIn);
         // quote a swap
         (uint256 maxInAmount, , ,) = s_quoter.quoteExactOutput(path, params.amountOut);
         // token transfer & approval
-        params.tokenIn.safeTransferFrom(msg.sender, address(this), maxInAmount);
-        params.tokenIn.safeApprove(address(s_swapRouter), maxInAmount);
+        TransferHelper.safeTransferFrom(params.tokenIn, msg.sender, address(this), maxInAmount);
+        TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), maxInAmount);
         // swap params
         ISwapRouterV2.ExactOutputParams memory swapParams = ISwapRouterV2.ExactOutputParams({
             path: path,
@@ -139,8 +135,8 @@ contract BaseSwap {
         if(inAmount > slippageTol) revert BaseSwap_SlippageExceeded(maxInAmount);
         if(inAmount < maxInAmount) {
             // if the amountIn is less than maxAmountIn require by router, then approve router to spend 0, and refund the amountIn to user
-            params.tokenIn.safeApprove(address(s_swapRouter), 0);
-            params.tokenIn.safeTransferFrom(address(this), params.recipient, maxInAmount - inAmount);
+            TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), 0);
+            TransferHelper.safeTransferFrom(params.tokenIn, address(this), params.recipient, maxInAmount - inAmount);
         }
         emit ExactOutputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }

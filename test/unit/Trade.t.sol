@@ -2,36 +2,52 @@
 pragma solidity ^0.8.20;
 
 import { Test, console } from "forge-std/Test.sol";
-import { Trade } from "../../src/Trade.sol";
+import { YoloTrade } from "../../src/YoloTrade.sol";
+import { IUniswapV3Factory } from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TradeTest is Test {
 
-    Trade trade;
+    YoloTrade trade;
+    IUniswapV3Factory poolFactory;
 
-    address quoter = 0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a;
-    address router = 0x2626664c2603336E57B271c5C0b26F421741e481;
-    address USDT = 0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2;
-    address USDC = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
-    address WETH = 0x4200000000000000000000000000000000000006;
-    address USER = 0x3a92f10694f38f2bea6A3794c3bD06880572Dc1f;
+    address quoter = 0x61fFE014bA17989E743c5F6cB21bF9697530B21e;
+    address router = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
+    address pool_factory = 0x1F98431c8aD98523631AE4a59f267346ea31F984 ;
+    address USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address WBTC = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
+    address PEPE = 0x6982508145454Ce325dDbE47a25d4ec3d2311933;
+    address DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address USER = 0x36FDBe7005414fA1611330Dc7E18725eD4A75600;
 
     function setUp() public {
-        trade = new Trade(router, quoter);
+        trade = new YoloTrade(router, quoter);
+        poolFactory = IUniswapV3Factory(pool_factory);
+
+        uint256 userBal = IERC20(USDT).balanceOf(USER);
+        console.log("balance of ", USDT, USER);
     }
 
     function test_exactInputSwap() public {
-        uint256 amountIn = 5e6;
+        uint256 amountIn = 100 ether;
         uint24 slippage = 5; 
-
+        // swapping from USDT is not working for some reason
         vm.startPrank(USER);
-        Trade.SwapExactInputParams memory params = Trade.SwapExactInputParams(USDT, WETH, amountIn, slippage);
+        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(DAI, WBTC, amountIn, slippage);
         // approving contract
-        IERC20(USDT).approve(address(trade), amountIn);
+        IERC20(DAI).approve(address(trade), amountIn);
         trade.swapExactInput(params);
         vm.stopPrank();
 
         console.log("swapped");
+    }
+
+    function test_gettingPool() public {
+        vm.prank(USER);
+        address poolAddr = poolFactory.getPool(DAI, PEPE, 3000);
+        console.log("getting pool", poolAddr);
     }
 
     function test_checkBalance() public {

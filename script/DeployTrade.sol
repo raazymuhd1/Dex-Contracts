@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
-import { Trade } from "../src/Trade.sol";
+import { YoloTrade } from "../src/YoloTrade.sol";
 
 contract CounterScript is Script {
     function setUp() public {}
