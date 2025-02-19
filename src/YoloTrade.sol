@@ -70,6 +70,7 @@ contract YoloTrade is Base, Ownable {
         if(tradeStatus == uint256(TradeStatus.Active)) {
             s_tradeStatus = TradeStatus.Paused;
             emit TradePaused(owner(), block.timestamp);
+            
         } else if(tradeStatus == uint256(TradeStatus.Paused)) {
             s_tradeStatus = TradeStatus.Active;
             emit TradeUnPaused(owner(), block.timestamp);
@@ -99,7 +100,7 @@ contract YoloTrade is Base, Ownable {
     /**
         @dev performing a swap for an exact Output amount of tokenOut
      */
-    function swapExactOutput(SwapExactOutputParams calldata params) external ValidCaller OnlyIfNotPaused returns(uint256 amtOut) {
+    function swapExactOutput(SwapExactOutputParams calldata params) external ValidCaller OnlyIfNotPaused returns(uint256 amtIn) {
         Base.ParamExactOutput memory swapParams = Base.ParamExactOutput(
             params.tokenIn,
             params.tokenOut,
@@ -109,7 +110,7 @@ contract YoloTrade is Base, Ownable {
             params.slippageTolerance
         );
 
-        exactOutputSwap(swapParams);
+        amtIn = exactOutputSwap(swapParams);
     }
 
     /**

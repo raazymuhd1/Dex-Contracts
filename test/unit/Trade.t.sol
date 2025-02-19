@@ -35,13 +35,13 @@ contract TradeTest is Test {
     }
 
     function test_exactInputSwap() public {
-        uint256 amountIn = 100 ether;
+        uint256 amountIn = 100e6;
         uint24 slippage = 5; 
         // swapping from USDT is not working for some reason
         vm.startPrank(USER);
-        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(DAI, WBTC, amountIn, slippage);
+        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(USDC, WBTC, amountIn, slippage);
         // approving contract
-        IERC20(DAI).approve(address(trade), amountIn);
+        IERC20(USDC).approve(address(trade), amountIn);
         trade.swapExactInput(params);
         vm.stopPrank();
 
@@ -49,7 +49,8 @@ contract TradeTest is Test {
     }
 
     function test_exactOutputSwap() public {
-        uint256 outAmt = 3e5;
+        uint256 outAmt = 3e4;
+       
         uint24 slippageTol = 2;
         vm.startPrank(USER);
         YoloTrade.SwapExactOutputParams memory params = YoloTrade.SwapExactOutputParams(
@@ -58,9 +59,9 @@ contract TradeTest is Test {
             outAmt,
             slippageTol
         );
-         bytes memory path = abi.encodePacked(params.tokenOut, POOL_FEE, params.tokenIn);
+         bytes memory path = abi.encodePacked(params.tokenIn, POOL_FEE, params.tokenOut);
         (uint256 maxAmtIn, , , ) = quoter_v2.quoteExactOutput(path, outAmt);
-        IERC20(params.tokenIn).approve(address(trade), maxAmtIn);
+        IERC20(DAI).approve(address(trade), maxAmtIn);
         uint256 inAmt = trade.swapExactOutput(params);
         vm.stopPrank();
 
@@ -69,7 +70,7 @@ contract TradeTest is Test {
 
     function test_gettingPool() public {
         vm.prank(USER);
-        address poolAddr = poolFactory.getPool(DAI, PEPE, 3000);
+        address poolAddr = poolFactory.getPool(DAI, WBTC, 3000);
         console.log("getting pool", poolAddr);
     }
 

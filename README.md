@@ -19,3 +19,10 @@
 
  #### Liquidity Pool
   A pool of tokens pair, usually it has 2 pair of token that has an amount of each of them in the pool contract.
+
+
+### A Refresher on how Proxy contract works
+  Essentially a user interacting directly with the proxy contract instead of the implementation contract itself, See below example on how it works:
+ - `User -> Tx -> Proxy Contract -> Implementation Contract`  
+
+  When a developer trying to interact with an implementation contract, they can access it by passing an implementation contract addrss into a Proxy interface, that's because the `Proxy` contract will forwards all the functions call to the implementation contract, by trying to look the function the users trying to call, when those functions didn't exist in the `Proxy contract`, The `Proxy` contract will trigger a fallback function and from fallback function a `Proxy` forwarding the call to the implementation contract.
