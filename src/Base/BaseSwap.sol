@@ -115,7 +115,7 @@ contract BaseSwap {
        InvalidPair(params.tokenIn, params.tokenOut) 
        InvalidRecipient(params.recipient) returns(uint256 inAmount) {
         // path in reversed order for exactOutput
-        bytes memory path = abi.encodePacked(params.tokenIn, params.swapFee, params.tokenOut);
+        bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.tokenIn);
         // quote a swap
         (uint256 maxInAmount, , ,) = s_quoter.quoteExactOutput(path, params.amountOut);
         // token transfer & approval
