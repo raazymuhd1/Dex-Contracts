@@ -49,23 +49,34 @@ contract TradeTest is Test {
     }
 
     function test_exactOutputSwap() public {
-        uint256 outAmt = 3e4;
+        uint256 outAmt = 3e3;
        
         uint24 slippageTol = 2;
         vm.startPrank(USER);
         YoloTrade.SwapExactOutputParams memory params = YoloTrade.SwapExactOutputParams(
-            DAI,
+            USDC,
             WBTC,
             outAmt,
             slippageTol
         );
-         bytes memory path = abi.encodePacked(params.tokenIn, POOL_FEE, params.tokenOut);
+         bytes memory path = abi.encodePacked(params.tokenOut, POOL_FEE, params.tokenIn);
         (uint256 maxAmtIn, , , ) = quoter_v2.quoteExactOutput(path, outAmt);
-        IERC20(DAI).approve(address(trade), maxAmtIn);
+        IERC20(USDC).approve(address(trade), maxAmtIn);
         uint256 inAmt = trade.swapExactOutput(params);
         vm.stopPrank();
 
         console.log("amountIN", inAmt);
+    }
+
+    function test_quotingSwap() public {
+        bytes memory pathOut = abi.encodePacked(WETH, POOL_FEE, DAI);
+        bytes memory pathIn = abi.encodePacked(DAI, POOL_FEE, WETH);
+        vm.prank(USER);
+        // (uint256 amountIn, , , ) = quoter_v2.quoteExactOutput(pathOut, 0.01 ether);
+        (uint256 amountOut, , , ) = quoter_v2.quoteExactInput(pathIn, 10e18);
+
+        console.log("exactInput:", amountOut);
+        // console.log(amountIn);
     }
 
     function test_gettingPool() public {

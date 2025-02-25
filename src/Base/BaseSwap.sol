@@ -21,7 +21,7 @@ contract BaseSwap {
     error BaseSwap_SlippageExceeded(uint256 amountOut);
 
     ISwapRouterV2 private s_swapRouter;
-    IQuoterV2 public s_quoter;
+    IQuoterV2 private s_quoter;
 
     uint256 private constant SLIPPAGE_PERCENTAGE = 100; // 100%
 
