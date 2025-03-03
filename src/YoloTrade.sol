@@ -49,7 +49,6 @@ contract YoloTrade is Base, Ownable {
        address tokenIn;
        address tokenOut;
        uint256 amtIn;
-       uint256 amtOutMin;
        uint24 slippageTolerance;
    }
 
@@ -57,7 +56,6 @@ contract YoloTrade is Base, Ownable {
        address tokenIn;
        address tokenOut;
        uint256 amtOut;
-       uint256 amtInMax;
        uint24 slippageTolerance;
    }
 
@@ -91,7 +89,6 @@ contract YoloTrade is Base, Ownable {
             POOL_FEE,
             msg.sender,
             params.amtIn,
-            params.amtOutMin,
             params.slippageTolerance
          );
         // calling for swap
@@ -110,7 +107,6 @@ contract YoloTrade is Base, Ownable {
             POOL_FEE,
             msg.sender,
             params.amtOut,
-            params.amtInMax,
             params.slippageTolerance
         );
 

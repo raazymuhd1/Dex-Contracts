@@ -8,13 +8,14 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TradeIntegrationTest is BaseTradeTest {
 
-    function QuotingExactInput(address tokenIn, address tokenOut, uint256 amountIn) public returns(uint256) {
-         bytes memory path = abi.encodePacked(tokenIn, POOL_FEE, tokenOut);
+    function test_quotingExactInput() public {
+         bytes memory path = abi.encodePacked(USDC, POOL_FEE, WETH);
 
-        // calling this trade quoting function on the client side is highky recommended, since it costs gas to quote a trade. 
-       ( uint256 expectedAmt, , ,) = quoter_v2.quoteExactInput(path, amountIn);
+        vm.startPrank(USER);
+        // IERC20(USDC).approve(address(quoter_v2), 100e6);
+       ( uint256 amountOut, , ,) = quoter_v2.quoteExactInput(path, 100e6);
 
-       return expectedAmt;
+       console.log(USER);
     }
 
     function QuotingExactOutput(address tokenIn, address tokenOut, uint256 amountOut) public returns(uint256) {
@@ -29,8 +30,7 @@ contract TradeIntegrationTest is BaseTradeTest {
         uint24 slippage = 5; 
         // swapping from USDT is not working for some reason
         vm.startPrank(USER);
-        uint256 outAmount = QuotingExactInput(USDC, WBTC, amountIn);
-        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(USDC, WBTC, amountIn, outAmount, slippage);
+        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(USDC, WBTC, amountIn, slippage);
         // approving contract
         IERC20(USDC).approve(address(trade), amountIn);
         trade.swapExactInput(params);
@@ -44,14 +44,13 @@ contract TradeIntegrationTest is BaseTradeTest {
         uint24 slippageTol = 2;
 
         vm.startPrank(USER);
-        uint256 maxAmountIn = QuotingExactOutput(USDC, WBTC, outAmt);
         YoloTrade.SwapExactOutputParams memory params = YoloTrade.SwapExactOutputParams(
             USDC,
             WBTC,
             outAmt,
-            maxAmountIn,
             slippageTol
         );
+        IERC20(USDC).approve(address(trade), )
         uint256 inAmt = trade.swapExactOutput(params);
         vm.stopPrank();
 
