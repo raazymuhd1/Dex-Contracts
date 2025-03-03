@@ -85,6 +85,7 @@ contract BaseSwap {
         TransferHelper.safeTransferFrom(params.tokenIn, msg.sender, address(this), params.amountIn);
         TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), params.amountIn);
 
+        // calling this trade quoting function on the client side is highky recommended, since it costs gas to quote a trade. 
        ( uint256 expectedAmt, , ,) = s_quoter.quoteExactInput(path, params.amountIn);
         ISwapRouterV2.ExactInputParams memory swapParams = ISwapRouterV2.ExactInputParams({
             path: path,

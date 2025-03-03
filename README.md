@@ -1,6 +1,9 @@
  # Trading Bot Contract
     a contract that let user tobe able to perform trade operation on any token they wish.
 
+### Quoting a trade 
+  when quoting a trade it is recommended to do it off-chain, since quoting a trade requires state-changing in uniswap contract, therefore it will expensive todo it.
+
 
  ## Important Terms   
  #### Slippage

@@ -7,7 +7,7 @@ import { IUniswapV3Factory } from "@uniswap/v3-core/contracts/interfaces/IUniswa
 import { IQuoterV2 } from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract TradeTest is Test {
+contract BaseTradeTest is Test {
 
     YoloTrade trade;
     IQuoterV2 quoter_v2;
