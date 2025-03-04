@@ -27,7 +27,7 @@ contract TradeIntegrationTest is BaseTradeTest {
 
      function test_exactInputSwap() public {
         uint256 amountIn = 100e6;
-        uint24 slippage = 5; 
+        uint24 slippage = 2; 
         // swapping from USDT is not working for some reason
         vm.startPrank(USER);
         YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(USDC, WBTC, amountIn, slippage);

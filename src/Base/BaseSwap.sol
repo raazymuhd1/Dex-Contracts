@@ -22,12 +22,13 @@ contract BaseSwap {
 
     ISwapRouterV2 private s_swapRouter;
     IQuoterV2 private s_quoter;
-
     uint256 private constant SLIPPAGE_PERCENTAGE = 100; // 100%
-
+    TradeQuoteType private s_tradeQuoteType = TradeQuoteType.ExactInput;
      // ------------------------------------------------------- EVENTS ------------------------------------------
      event ExactInputSwapped(address indexed recipient, address indexed tokenIn, address indexed tokenOut);
      event ExactOutputSwapped(address indexed recipient, address indexed tokenIn, address indexed tokenOut);
+     event ExactInputQuoted(address indexed tokenIn, address indexed tokenOut, uint256 amount);
+     event ExactOutputQuoted(address indexed tokenIn, address indexed tokenOut, uint256 amount);
 
     constructor(address router_, address quoter_) {
         s_swapRouter = ISwapRouterV2(router_);
@@ -44,6 +45,14 @@ contract BaseSwap {
         uint256 amountIn;
         uint24 slippageTolerance;
     }
+    struct ParamQuoteTrade{
+        address tokenIn;
+        address tokenOut;
+        uint24 swapFee;
+        uint256 amount;
+    }
+
+   
 
     struct ParamExactOutput {
         address tokenIn;
@@ -52,6 +61,12 @@ contract BaseSwap {
         address recipient;
         uint256 amountOut;
         uint24 slippageTolerance;
+    }
+
+    // ---------------------------------------------- ENUMS ------------------------------------------------
+    enum TradeQuoteType {
+        ExactInput,
+        ExactOutput
     }
 
     // ------------------------------------------------------- MODIFIERS ------------------------------------------
@@ -140,8 +155,19 @@ contract BaseSwap {
         emit ExactOutputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }
 
-    function quotingTrade(address tokenIn, address tokenOut, uint24 fee) external returns(uint256) {
+    function quotingTrade(ParamQuoteTrade memory params, uint256 tradeType) external returns(uint256) {
+        if(tradeType == uint256(s_tradeQuoteType)) {
+            bytes memory path = abi.encodePacked(params.tokenIn, params.swapFee, params.tokenOut);
+            (uint256 amountOut, , , ) = s_quoter.quoteExactInput(path, params.amount);
+            emit ExactInputQuoted(params.tokenIn, params.tokenOut, params.amount);
+            return amountOut;
 
+        } else if(tradeType == uint256(s_tradeQuoteType)) {
+            bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.tokenIn);
+            (uint256 amountInMax, , , ) = s_quoter.quoteExactOutput(path, params.amount);
+             emit ExactOutputQuoted(params.tokenIn, params.tokenOut, params.amount);
+            return amountInMax;
+        }
     }
 
     /**
