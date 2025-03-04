@@ -9,13 +9,13 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract TradeIntegrationTest is BaseTradeTest {
 
     function test_quotingExactInput() public {
-         bytes memory path = abi.encodePacked(USDC, POOL_FEE, WETH);
+         bytes memory path = abi.encodePacked(USDC, POOL_FEE, DAI);
 
         vm.startPrank(USER);
         // IERC20(USDC).approve(address(quoter_v2), 100e6);
        ( uint256 amountOut, , ,) = quoter_v2.quoteExactInput(path, 100e6);
 
-       console.log(USER);
+       console.log("amount", amountOut);
     }
 
     function QuotingExactOutput(address tokenIn, address tokenOut, uint256 amountOut) public returns(uint256) {
@@ -50,7 +50,7 @@ contract TradeIntegrationTest is BaseTradeTest {
             outAmt,
             slippageTol
         );
-        IERC20(USDC).approve(address(trade), )
+        // IERC20(USDC).approve(address(trade), );
         uint256 inAmt = trade.swapExactOutput(params);
         vm.stopPrank();
 

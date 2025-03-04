@@ -140,6 +140,10 @@ contract BaseSwap {
         emit ExactOutputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }
 
+    function quotingTrade(address tokenIn, address tokenOut, uint24 fee) external returns(uint256) {
+
+    }
+
     /**
         @dev updating the swap router, and quoter
         @notice can only be called by its child
