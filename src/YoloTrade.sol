@@ -49,6 +49,7 @@ contract YoloTrade is Base, Ownable {
        address tokenIn;
        address tokenOut;
        uint256 amtIn;
+       uint256 amtOutMin;
        uint24 slippageTolerance;
    }
 
@@ -56,6 +57,7 @@ contract YoloTrade is Base, Ownable {
        address tokenIn;
        address tokenOut;
        uint256 amtOut;
+       uint256 amtInMax;
        uint24 slippageTolerance;
    }
 
@@ -81,7 +83,7 @@ contract YoloTrade is Base, Ownable {
         @dev performing a swap for exact tokenIn for tokenOut
         @param params - see @SwapExactInputParams struct for details
      */
-    function swapExactInput(SwapExactInputParams calldata params) external ValidCaller OnlyIfNotPaused {
+    function swapExactInput(SwapExactInputParams calldata params) external ValidCaller OnlyIfNotPaused returns(uint amountOut) {
         if(params.amtIn <= 0) revert Base.BaseSwap_NotEnoughAmt(params.amtIn);
          Base.ParamExactInput memory swapParams = Base.ParamExactInput(
             params.tokenIn,
@@ -89,10 +91,11 @@ contract YoloTrade is Base, Ownable {
             POOL_FEE,
             msg.sender,
             params.amtIn,
+            params.amtOutMin,
             params.slippageTolerance
          );
         // calling for swap
-        uint256 amountOut =  exactInputSwap(swapParams);
+        amountOut =  exactInputSwap(swapParams);
         if(amountOut <= 0) revert Trade__UnexpectedAmount();
         emit SwapSuccessfull(params.tokenIn, params.tokenOut, params.amtIn);
     }
@@ -107,6 +110,7 @@ contract YoloTrade is Base, Ownable {
             POOL_FEE,
             msg.sender,
             params.amtOut,
+            params.amtInMax,
             params.slippageTolerance
         );
 

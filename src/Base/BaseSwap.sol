@@ -43,6 +43,7 @@ contract BaseSwap {
         uint24 swapFee;
         address recipient;
         uint256 amountIn;
+        uint256 amountOutMin;
         uint24 slippageTolerance;
     }
     struct ParamQuoteTrade{
@@ -60,6 +61,7 @@ contract BaseSwap {
         uint24 swapFee;
         address recipient;
         uint256 amountOut;
+        uint256 amountInMax;
         uint24 slippageTolerance;
     }
 
@@ -99,19 +101,19 @@ contract BaseSwap {
         TransferHelper.safeTransferFrom(params.tokenIn, msg.sender, address(this), params.amountIn);
         TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), params.amountIn);
 
-        ( uint256 amountOut, , ,) = s_quoter.quoteExactInput(path, params.amountIn);
+        // ( uint256 amountOut, , ,) = s_quoter.quoteExactInput(path, params.amountIn);
         ISwapRouterV2.ExactInputParams memory swapParams = ISwapRouterV2.ExactInputParams({
             path: path,
             recipient: params.recipient,
             amountIn: params.amountIn,
-            amountOutMinimum: amountOut
+            amountOutMinimum: params.amountOutMin
         });
 
         actualAmt = s_swapRouter.exactInput(swapParams);
         // handling the slippage tolerance calculations
         // if the price when the trade gets executed is higher than the time user places a trade, revert the tx 
         // another word, if the outAmount is 1% (whetever slippage tolerance percentage user select) less than the expected OutAmount, revert the tx. 
-        uint256 slippageTol = (amountOut * (SLIPPAGE_PERCENTAGE - params.slippageTolerance)) / 100; 
+        uint256 slippageTol = (params.amountOutMin * (SLIPPAGE_PERCENTAGE - params.slippageTolerance)) / 100; 
 
         if(actualAmt < slippageTol) revert("slippage tolerance exceeded");
         // if user gets less than the slippage tolerance, then revert the tx
@@ -131,38 +133,39 @@ contract BaseSwap {
         // path in reversed order for exactOutput
         bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.tokenIn);
         // // quote a swap
-        (uint256 maxInAmount, , ,) = s_quoter.quoteExactOutput(path, params.amountOut);
+        // (uint256 maxInAmount, , ,) = s_quoter.quoteExactOutput(path, params.amountOut);
         // token transfer & approval
-        TransferHelper.safeTransferFrom(params.tokenIn, msg.sender, address(this), maxInAmount);
-        TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), maxInAmount);
+        TransferHelper.safeTransferFrom(params.tokenIn, msg.sender, address(this), params.amountInMax);
+        TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), params.amountInMax);
         // swap params
         ISwapRouterV2.ExactOutputParams memory swapParams = ISwapRouterV2.ExactOutputParams({
             path: path,
             recipient: params.recipient,
             amountOut: params.amountOut,
-            amountInMaximum: maxInAmount
+            amountInMaximum: params.amountInMax
         });
         // calling for swap
         inAmount = s_swapRouter.exactOutput(swapParams);    
         // slippage tolerance handler
-        uint256 slippageTol = (maxInAmount * (SLIPPAGE_PERCENTAGE + params.slippageTolerance)) / 100;
-        if(inAmount > slippageTol) revert BaseSwap_SlippageExceeded(maxInAmount);
-        if(inAmount < maxInAmount) {
+        uint256 slippageTol = (params.amountInMax * (SLIPPAGE_PERCENTAGE + params.slippageTolerance)) / 100;
+        if(inAmount > slippageTol) revert BaseSwap_SlippageExceeded(params.amountInMax);
+        if(inAmount < params.amountInMax) {
             // if the amountIn is less than maxAmountIn required by router, then approved the router to spend 0, and refund the amountIn to user
             TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), 0);
-            TransferHelper.safeTransferFrom(params.tokenIn, address(this), params.recipient, maxInAmount - inAmount);
+            TransferHelper.safeTransferFrom(params.tokenIn, address(this), params.recipient, params.amountInMax - inAmount);
         }
         emit ExactOutputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }
 
     function quotingTrade(ParamQuoteTrade memory params, uint256 tradeType) external returns(uint256) {
-        if(tradeType == uint256(s_tradeQuoteType)) {
+
+        if(tradeType == 0) {
             bytes memory path = abi.encodePacked(params.tokenIn, params.swapFee, params.tokenOut);
             (uint256 amountOut, , , ) = s_quoter.quoteExactInput(path, params.amount);
             emit ExactInputQuoted(params.tokenIn, params.tokenOut, params.amount);
             return amountOut;
 
-        } else if(tradeType == uint256(s_tradeQuoteType)) {
+        } else if(tradeType == 1) {
             bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.tokenIn);
             (uint256 amountInMax, , , ) = s_quoter.quoteExactOutput(path, params.amount);
              emit ExactOutputQuoted(params.tokenIn, params.tokenOut, params.amount);
