@@ -50,7 +50,9 @@ contract TradeIntegrationTest is BaseTradeTest {
             outAmt,
             slippageTol
         );
-        // IERC20(USDC).approve(address(trade), );
+        bytes memory path = abi.encodePacked(params.tokenOut, POOL_FEE, params.tokenIn);
+        (uint256 maxInAmount, , ,) = quoter_v2.quoteExactOutput(path, outAmt);
+        IERC20(USDC).approve(address(trade), maxInAmount);
         uint256 inAmt = trade.swapExactOutput(params);
         vm.stopPrank();
 

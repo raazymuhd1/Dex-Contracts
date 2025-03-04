@@ -31,7 +31,7 @@ contract TradeTest is BaseTradeTest {
     }
 
     function testSlippageCalculations() public pure{
-         uint256 slippageTol = (100e18 * (100 - 6)) / 100; 
+         uint256 slippageTol = (3e8 * (100 + 6)) / 100; 
 
         console.log(slippageTol);
      

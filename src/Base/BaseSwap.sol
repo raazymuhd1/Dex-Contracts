@@ -130,7 +130,7 @@ contract BaseSwap {
         // calling for swap
         inAmount = s_swapRouter.exactOutput(swapParams);    
         // slippage tolerance handler
-        uint256 slippageTol = (maxInAmount * (SLIPPAGE_PERCENTAGE - params.slippageTolerance)) / 100;
+        uint256 slippageTol = (maxInAmount * (SLIPPAGE_PERCENTAGE + params.slippageTolerance)) / 100;
         if(inAmount > slippageTol) revert BaseSwap_SlippageExceeded(maxInAmount);
         if(inAmount < maxInAmount) {
             // if the amountIn is less than maxAmountIn required by router, then approved the router to spend 0, and refund the amountIn to user
