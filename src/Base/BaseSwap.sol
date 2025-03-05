@@ -157,6 +157,11 @@ contract BaseSwap {
         emit ExactOutputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }
 
+    /**
+     * @dev quoting a trade for both swap type
+     * @param params - see @ParamQuoteTrade struct
+     * @param tradeType - "0" for exactInput, "1" for exactOutput
+     */
     function quotingTrade(ParamQuoteTrade memory params, uint256 tradeType) external returns(uint256) {
 
         if(tradeType == 0) {
