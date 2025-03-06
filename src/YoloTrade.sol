@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { BaseSwap as Base } from "./Base/BaseSwap.sol";
+import { AggregatorV3Interface } from "@chainlink/contracts/shared/interfaces/AggregatorV3Interface.sol";
 
 contract YoloTrade is Base, Ownable {
 
@@ -118,13 +119,15 @@ contract YoloTrade is Base, Ownable {
     }
 
     /**
-        @dev calling for router & quoter update
-        @param routerNew_ - an address of a new router
-        @param quoterNew_ - an address of a new quoter
+     * @dev getting token price for any supported tokens by chainlink price feeds oracle
      */
-     function updateConfig(address routerNew_, address quoterNew_) external onlyOwner returns(address, address) {
-        _updateSwapConfig(routerNew_, quoterNew_);
-     }
+    function gettingTokenPrice(address token) external returns(uint256 price_) {
+
+    }
+
+    function _handleTokenPrice(address token) internal returns(uint256) {
+
+    }
 
     receive() external payable {}
 }

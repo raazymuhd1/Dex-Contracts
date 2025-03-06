@@ -5,7 +5,7 @@ libs = ["lib"]
 
 remappings = [
     "@forge-std/=lib/forge-std/src/",
-    "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/src/",
+    "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/src/v0.8/",
     "@uniswap/v3-core/contracts/=lib/v3-core/contracts/", 
     "@uniswap/v3-periphery/contracts/=lib/v3-periphery/contracts/",
     "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",

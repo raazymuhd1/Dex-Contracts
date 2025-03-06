@@ -182,7 +182,7 @@ contract BaseSwap {
         @dev updating the swap router, and quoter
         @notice can only be called by its child
      */
-    function _updateSwapConfig(address newRouter_, address newQuoter_) internal returns(address, address) {
+    function _updateSwapConfig(address newRouter_, address newQuoter_) public returns(address, address) {
           s_swapRouter = ISwapRouterV2(newRouter_);
           s_quoter = IQuoterV2(newQuoter_);
 
