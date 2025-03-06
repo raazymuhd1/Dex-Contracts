@@ -5,17 +5,23 @@ import {Script, console} from "forge-std/Script.sol";
 import { HelperConfig } from "./HelperConfig.s.sol";
 import { YoloTrade } from "../src/YoloTrade.sol";
 
-contract CounterScript is Script {
-    function setUp() public {}
+contract DeployTrade is Script {
+
     HelperConfig helperConfig;
 
-    // 0x694AA1769357215DE4FAC081bf1f309aDC325306 price feeds sepolia
+     address quoterV2;
+     address router;
+     address poolFactory;
+     address USER;
+     address WETH;
+     address USDT;
+     address USDC;
+     address DAI;
 
-    function run() public {
+    function run() public returns(HelperConfig) {
         vm.broadcast();
         helperConfig = new HelperConfig();
-        (address quoter, , , , , , ) = helperConfig.s_networkConfig();
 
-        console.log(quoter);
+        return helperConfig;
     }
 }
