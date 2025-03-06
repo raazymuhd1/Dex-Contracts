@@ -9,8 +9,8 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract TradeTest is BaseTradeTest {
 
     function test_quotingSwap() public {
-        bytes memory pathOut = abi.encodePacked(WETH, POOL_FEE, DAI);
-        bytes memory pathIn = abi.encodePacked(DAI, POOL_FEE, WETH);
+        bytes memory pathOut = abi.encodePacked(tokens.WETH, POOL_FEE, tokens.DAI);
+        bytes memory pathIn = abi.encodePacked(tokens.DAI, POOL_FEE, tokens.WETH);
         vm.prank(USER);
         // (uint256 amountIn, , , ) = quoter_v2.quoteExactOutput(pathOut, 0.01 ether);
         (uint256 amountOut, , , ) = quoter_v2.quoteExactInput(pathIn, 10e18);
@@ -21,12 +21,12 @@ contract TradeTest is BaseTradeTest {
 
     function test_gettingPool() public {
         vm.prank(USER);
-        address poolAddr = poolFactory.getPool(DAI, WBTC, 3000);
+        address poolAddr = poolFactory.getPool(tokens.DAI, tokens.WETH, 3000);
         console.log("getting pool", poolAddr);
     }
 
     function test_checkBalance() public {
-       uint256 userBalance =  IERC20(USDT).balanceOf(USER);
+       uint256 userBalance =  IERC20(tokens.USDT).balanceOf(USER);
        console.log("user balance", userBalance);
     }
 

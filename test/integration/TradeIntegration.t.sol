@@ -37,10 +37,10 @@ contract TradeIntegrationTest is BaseTradeTest {
         uint24 slippage = 2; 
         // swapping from USDT is not working for some reason
         vm.startPrank(USER);
-        uint256 amountOutMin = quotingExactInput(USDC, WBTC, amountIn);
-        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(USDC, WBTC, amountIn, amountOutMin, slippage);
+        uint256 amountOutMin = quotingExactInput(tokens.USDC, tokens.WETH, amountIn);
+        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(tokens.USDC, tokens.WETH, amountIn, amountOutMin, slippage);
         // approving contract
-        IERC20(USDC).approve(address(trade), amountIn);
+        IERC20(tokens.USDC).approve(address(trade), amountIn);
         uint256 amountOut = trade.swapExactInput(params);
         vm.stopPrank();
 
@@ -52,17 +52,17 @@ contract TradeIntegrationTest is BaseTradeTest {
         uint24 slippageTol = 2;
 
         vm.startPrank(USER);
-        uint256 amountInMax = quotingExactOutput(USDC, WETH, outAmt);
+        uint256 amountInMax = quotingExactOutput(tokens.USDC, tokens.WETH, outAmt);
         YoloTrade.SwapExactOutputParams memory params = YoloTrade.SwapExactOutputParams(
-            USDC,
-            WBTC,
+            tokens.USDC,
+            tokens.WETH,
             outAmt,
             amountInMax,
             slippageTol
         );
         bytes memory path = abi.encodePacked(params.tokenOut, POOL_FEE, params.tokenIn);
         // (uint256 maxInAmount, , ,) = quoter_v2.quoteExactOutput(path, outAmt);
-        IERC20(USDC).approve(address(trade), amountInMax);
+        IERC20(tokens.USDC).approve(address(trade), amountInMax);
         uint256 inAmt = trade.swapExactOutput(params);
         vm.stopPrank();
 
