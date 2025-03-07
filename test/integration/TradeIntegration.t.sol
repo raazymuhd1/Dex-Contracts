@@ -68,6 +68,22 @@ contract TradeIntegrationTest is BaseTradeTest {
 
         console.log("amountIN", inAmt);
     }
+
+    // function test_gettingTokenPrice() public {
+    //     address USDT_FEED = 0x3E7d1eAB13ad0104d2750B8863b489D65364e32D;
+    //     uint256 PRECISION = 1e6;
+    //     uint256 testAmount = 10e6;
+
+
+    //     vm.prank(USER);
+    //     int256 price = trade.gettingTokenPrice(tokens.USDT, USDT_FEED);
+    //     uint256 priceIn6 = uint256(price) / 1e2;
+    //     uint256 priceInUsd = (testAmount * priceIn6) / PRECISION;
+    //     // 99_998_783
+    //     // 16_666_463_833_333
+    //     console.log("base price", price);
+    //     console.log("token price in USD", priceInUsd);
+    // }
     
 
 }

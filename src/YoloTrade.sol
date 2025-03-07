@@ -20,6 +20,8 @@ contract YoloTrade is Base, Ownable {
     uint256 private constant DECIMALS6 = 1e6;
     uint24 private constant POOL_FEE = 3000; // 0.3%
     address private constant HOP_TOKEN = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // WETH
+
+    AggregatorV3Interface private s_priceFeeds;
     
 
     // ---------------------------------------- EVENTS ---------------------------------------
@@ -29,7 +31,6 @@ contract YoloTrade is Base, Ownable {
 
     constructor(address router_,  address quoter_) Base(router_, quoter_) Ownable(msg.sender) {
         s_owner = owner();
-        // s_priceFeed = AggregatorV3Interface(priceFeed_);
     }
 
     // -------------------------------------- MODIFIERS --------------------------------
@@ -116,17 +117,6 @@ contract YoloTrade is Base, Ownable {
         );
 
         amtIn = exactOutputSwap(swapParams);
-    }
-
-    /**
-     * @dev getting token price for any supported tokens by chainlink price feeds oracle
-     */
-    function gettingTokenPrice(address token) external returns(uint256 price_) {
-
-    }
-
-    function _handleTokenPrice(address token) internal returns(uint256) {
-
     }
 
     receive() external payable {}
