@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import { BaseTradeTest } from "../BaseTrade.t.sol";
-import { console } from "forge-std/Test.sol";
-import { YoloTrade } from "../../src/YoloTrade.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {BaseTradeTest} from "../BaseTrade.t.sol";
+import {console} from "forge-std/Test.sol";
+import {YoloTrade} from "../../src/YoloTrade.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TradeTest is BaseTradeTest {
-
     function test_quotingSwap() public {
         bytes memory pathOut = abi.encodePacked(tokens.WETH, POOL_FEE, tokens.DAI);
         bytes memory pathIn = abi.encodePacked(tokens.DAI, POOL_FEE, tokens.WETH);
         vm.prank(USER);
         // (uint256 amountIn, , , ) = quoter_v2.quoteExactOutput(pathOut, 0.01 ether);
-        (uint256 amountOut, , , ) = quoter_v2.quoteExactInput(pathIn, 10e18);
+        (uint256 amountOut,,,) = quoter_v2.quoteExactInput(pathIn, 10e18);
 
         console.log("exactInput:", amountOut);
         // console.log(amountIn);
@@ -26,14 +25,13 @@ contract TradeTest is BaseTradeTest {
     }
 
     function test_checkBalance() public {
-       uint256 userBalance =  IERC20(tokens.USDT).balanceOf(USER);
-       console.log("user balance", userBalance);
+        uint256 userBalance = IERC20(tokens.USDT).balanceOf(USER);
+        console.log("user balance", userBalance);
     }
 
-    function testSlippageCalculations() public pure{
-         uint256 slippageTol = (3e8 * (100 + 6)) / 100; 
+    function testSlippageCalculations() public pure {
+        uint256 slippageTol = (3e8 * (100 + 6)) / 100;
 
         console.log(slippageTol);
-     
     }
 }

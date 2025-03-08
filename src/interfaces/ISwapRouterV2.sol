@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-
 /// @title Router token swapping functionality
 /// @notice Functions for swapping tokens via Uniswap V3
 interface ISwapRouterV2 {
-
     struct ExactInputParams {
         bytes path;
         address recipient;

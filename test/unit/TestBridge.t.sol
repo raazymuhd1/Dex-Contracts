@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.20;
 
-import { Test, console } from "forge-std/Test.sol";
-import { Bridge } from "../../src/Bridge.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {Bridge} from "../../src/Bridge.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // import { IScrollERC20Upgradeable } from "@scroll/contracts/libraries/token/"
-import { IL1GatewayRouter } from "@scroll/contracts/L1/gateways/IL1GatewayRouter.sol";
+import {IL1GatewayRouter} from "@scroll/contracts/L1/gateways/IL1GatewayRouter.sol";
 
 contract BridgeTest is Test {
-
     Bridge bridge;
     IL1GatewayRouter l1GatewayRouter_;
-    address l1GatewayRouter =  0xF8B1378579659D8F7EE5f3C929c2f3E332E41Fd6;
+    address l1GatewayRouter = 0xF8B1378579659D8F7EE5f3C929c2f3E332E41Fd6;
     address l2GatewayRouter = 0x4C0926FF5252A435FD19e10ED15e5a249Ba19d79;
     address USER = 0x3005A4C0EFE7E66F3f60eF8704983247A5c6ca61;
     address USER2 = 0x4097E255DeDc6EC11132fdE8f9081e17c6f9aeC8;
@@ -42,12 +41,7 @@ contract BridgeTest is Test {
         console.log("prev balance", userBalanceBfore);
         vm.startPrank(USER);
         IERC20(USDCL1).approve(address(bridge), TEST_AMOUNT);
-        bridge.erc20BridgeL2{value: BRIDGE_FEE}(
-            USDCL1,
-            TEST_AMOUNT,
-            GAS_LIMIT,
-            USER2
-        );
+        bridge.erc20BridgeL2{value: BRIDGE_FEE}(USDCL1, TEST_AMOUNT, GAS_LIMIT, USER2);
         uint256 userBalanceAfter = IERC20(USDCL1).balanceOf(USER);
         console.log("prev balance", userBalanceAfter);
         // making the contract persistent when another fork is active
@@ -56,15 +50,10 @@ contract BridgeTest is Test {
         vm.selectFork(SCROLL_FORK);
         vm.startPrank(USER2);
         IERC20(USDCL2).approve(address(bridge), TEST_AMOUNT);
-        bridge.erc20BridgeToL1{value: BRIDGEL2_FEE}(
-            USDCL2,
-            TEST_AMOUNT,
-            GAS_LIMIT,
-            USER
-        );
+        bridge.erc20BridgeToL1{value: BRIDGEL2_FEE}(USDCL2, TEST_AMOUNT, GAS_LIMIT, USER);
         // checking user balance on scroll chian
-         uint256 userBalanceL2 = IERC20(USDCL2).balanceOf(USER);
-         console.log(userBalanceL2);
+        uint256 userBalanceL2 = IERC20(USDCL2).balanceOf(USER);
+        console.log(userBalanceL2);
     }
 
     function test_getL2TokenAddr() public {
