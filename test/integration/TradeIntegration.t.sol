@@ -9,21 +9,6 @@ import {BaseSwap as Base} from "../../src/Base/BaseSwap.sol";
 
 contract TradeIntegrationTest is BaseTradeTest {
 
-    function quotingExactInput(address tokenIn, address tokenOut, uint256 amountIn) public returns (uint256) {
-        uint256 amountOut = trade.quotingTrade(Base.ParamQuoteTrade(tokenIn, tokenOut, POOL_FEE, amountIn), 0);
-        console.log("amount", amountOut);
-        return amountOut;
-    }
-
-    function quotingExactOutput(address tokenIn, address tokenOut, uint256 amountOut) public returns (uint256) {
-        uint256 amountOut = 3e3;
-
-        uint256 amountIn = trade.quotingTrade(Base.ParamQuoteTrade(tokenIn, tokenOut, POOL_FEE, amountOut), 1);
-
-        console.log("amount", amountIn);
-        return amountIn;
-    }
-
     function test_exactInputSwap() public {
         uint256 amountIn = 0.4 ether;
         uint24 slippage = 2;

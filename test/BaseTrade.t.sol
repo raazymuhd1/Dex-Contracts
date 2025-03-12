@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
+import { BaseSwap as Base } from "../src/Base/BaseSwap.sol";
 import {YoloTrade} from "../../src/YoloTrade.sol";
 import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import {IQuoterV2} from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
@@ -19,9 +20,10 @@ contract BaseTradeTest is Test {
     address quoter;
     address router;
     address pool_factory;
-    uint24 POOL_FEE = 2000;
+    uint24 POOL_FEE = 3000;
     HelperConfig.Tokens tokens;
     address USER;
+    address ZERO_ADDRESS = address(0);
 
     function setUp() public {
         deployer = new DeployTrade();
@@ -35,5 +37,20 @@ contract BaseTradeTest is Test {
 
         uint256 userBal = IERC20(tokens.USDT).balanceOf(USER);
         console.log("balance of ", tokens.USDT, USER);
+    }
+
+      function quotingExactInput(address tokenIn, address tokenOut, uint256 amountIn) public returns (uint256) {
+        uint256 amountOut = trade.quotingTrade(Base.ParamQuoteTrade(tokenIn, tokenOut, POOL_FEE, amountIn), 0);
+        console.log("amount", amountOut);
+        return amountOut;
+    }
+
+    function quotingExactOutput(address tokenIn, address tokenOut, uint256 amountOut) public returns (uint256) {
+        uint256 amountOut = 3e3;
+
+        uint256 amountIn = trade.quotingTrade(Base.ParamQuoteTrade(tokenIn, tokenOut, POOL_FEE, amountOut), 1);
+
+        console.log("amount", amountIn);
+        return amountIn;
     }
 }

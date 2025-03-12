@@ -7,20 +7,42 @@ import {YoloTrade} from "../../src/YoloTrade.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TradeTest is BaseTradeTest {
-    function test_quotingSwap() public {
-        bytes memory pathOut = abi.encodePacked(tokens.WETH, POOL_FEE, tokens.DAI);
-        bytes memory pathIn = abi.encodePacked(tokens.DAI, POOL_FEE, tokens.WETH);
-        vm.prank(USER);
-        // (uint256 amountIn, , , ) = quoter_v2.quoteExactOutput(pathOut, 0.01 ether);
-        (uint256 amountOut,,,) = quoter_v2.quoteExactInput(pathIn, 10e18);
 
-        console.log("exactInput:", amountOut);
-        // console.log(amountIn);
+    function test_quotingSwap() public {
+        bytes memory path = abi.encodePacked(tokens.DAI, POOL_FEE, tokens.WETH);
+        vm.prank(USER);
+        (uint256 amountIn, , , ) = quoter_v2.quoteExactInput(path, 10e18);
+        bytes memory sig = abi.encodeWithSignature("quoteExactInput(bytes,uint256)", path, 10e18);
+        (bool success, ) = address(quoter_v2).staticcall(sig);
+
+        console.log("exactInput:", success);
+        console.log(amountIn);
+    }
+
+    function test_exactInputSwapZeroAddress() public {
+        uint256 amountIn = 50e6;
+        uint24 slippage = 2; 
+
+        uint256 amountOut = quotingExactInput(tokens.USDC, tokens.WETH, amountIn);
+        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(
+            tokens.USDC,
+            tokens.WETH,
+            amountIn,
+            amountOut,
+            slippage
+        );
+        vm.startPrank(ZERO_ADDRESS);
+        vm.expectRevert();
+        trade.swapExactInput(params);
     }
 
     function test_gettingPool() public {
         vm.prank(USER);
         address poolAddr = poolFactory.getPool(tokens.DAI, tokens.WETH, 3000);
+        bytes memory sig = abi.encodeWithSignature("getPool(address,address,uint256)", tokens.DAI, tokens.WETH, 3000);
+        (bool success, bytes memory data) = address(pool_factory).staticcall(sig);
+        console.log("static call", success);
+        console.logBytes(data);
         console.log("getting pool", poolAddr);
     }
 

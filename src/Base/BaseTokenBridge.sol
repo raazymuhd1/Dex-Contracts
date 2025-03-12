@@ -5,6 +5,10 @@ import {IL1GatewayRouter} from "@scroll/contracts/L1/gateways/IL1GatewayRouter.s
 import {IL2GatewayRouter} from "@scroll/contracts/L2/gateways/IL2GatewayRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+/**
+ * @dev this contract uses a scroll bridge contract to bridge ERC20 and ETH to the dest chain.
+ */
+
 abstract contract BaseTokenBridge {
     IL1GatewayRouter private s_gatewayRouterL1;
     IL2GatewayRouter private s_gatewayRouterL2;
