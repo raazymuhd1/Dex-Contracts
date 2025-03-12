@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {BaseTradeTest} from "../BaseTrade.t.sol";
+import { BaseSwap as Base } from "../../src/base/BaseSwap.sol";
 import {console} from "forge-std/Test.sol";
 import {YoloTrade} from "../../src/YoloTrade.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -32,7 +33,24 @@ contract TradeTest is BaseTradeTest {
             slippage
         );
         vm.startPrank(ZERO_ADDRESS);
-        vm.expectRevert();
+        vm.expectPartialRevert(Base.BaseSwap_InvalidCaller.selector);
+        trade.swapExactInput(params);
+    }
+
+    function test_exactInputInvalidToken() public {
+        uint256 amountIn = 50e6;
+        uint24 slippage = 2; 
+
+        // uint256 amountOut = quotingExactInput(INVALID_TOKEN1, INVALID_TOKEN2, amountIn);
+        YoloTrade.SwapExactInputParams memory params = YoloTrade.SwapExactInputParams(
+            INVALID_TOKEN1,
+            INVALID_TOKEN2,
+            amountIn,
+            0,
+            slippage
+        );
+        vm.startPrank(USER);
+        vm.expectPartialRevert(Base.BaseSwap_InvalidPair.selector);
         trade.swapExactInput(params);
     }
 

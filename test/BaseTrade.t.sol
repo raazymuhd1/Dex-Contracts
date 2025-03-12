@@ -24,6 +24,8 @@ contract BaseTradeTest is Test {
     HelperConfig.Tokens tokens;
     address USER;
     address ZERO_ADDRESS = address(0);
+    address INVALID_TOKEN1 = address(0);
+    address INVALID_TOKEN2 = address(0);
 
     function setUp() public {
         deployer = new DeployTrade();
