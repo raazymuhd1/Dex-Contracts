@@ -35,7 +35,7 @@ contract BaseTradeTest is Test {
         quoter_v2 = IQuoterV2(quoter);
 
         // vm.prank(USER);
-        trade = new YoloTrade(router, quoter);
+        trade = new YoloTrade(router, quoter, pool_factory);
 
         uint256 userBal = IERC20(tokens.USDT).balanceOf(USER);
         console.log("balance of ", tokens.USDT, USER);

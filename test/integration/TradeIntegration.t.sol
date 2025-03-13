@@ -10,15 +10,15 @@ import {BaseSwap as Base} from "../../src/Base/BaseSwap.sol";
 contract TradeIntegrationTest is BaseTradeTest {
 
     function test_exactInputSwap() public {
-        uint256 amountIn = 0.4 ether;
+        uint256 amountIn = 100e6;
         uint24 slippage = 2;
         // swapping from USDT is not working for some reason
         vm.startPrank(USER);
-        uint256 amountOutMin = quotingExactInput(tokens.WETH, tokens.USDT, amountIn);
+        uint256 amountOutMin = quotingExactInput(tokens.USDC, tokens.WETH, amountIn);
         YoloTrade.SwapExactInputParams memory params =
-            YoloTrade.SwapExactInputParams(tokens.WETH, tokens.USDT, amountIn, amountOutMin, slippage);
+            YoloTrade.SwapExactInputParams(tokens.USDC, tokens.WETH, amountIn, amountOutMin, slippage);
         // approving contract
-        IERC20(tokens.WETH).approve(address(trade), amountIn);
+        IERC20(tokens.USDC).approve(address(trade), amountIn);
         uint256 amountOut = trade.swapExactInput(params);
         vm.stopPrank();
 

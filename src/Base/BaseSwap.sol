@@ -7,6 +7,7 @@ pragma solidity ^0.8.20;
  */
 import {ISwapRouterV2} from "../interfaces/ISwapRouterV2.sol";
 import {IQuoterV2} from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
+import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
@@ -18,9 +19,12 @@ contract BaseSwap {
     error BaseSwap_AmountLessThanExpected(uint256 amt, uint256 expectedAmt);
     error BaseSwap_InvalidPair(address tokenA, address tokenB);
     error BaseSwap_SlippageExceeded(uint256 amountOut);
+    error BaseSwap_PoolNotExist();
 
     ISwapRouterV2 private s_swapRouter;
     IQuoterV2 private s_quoter;
+    address private s_factoryAddr;
+
     uint256 private constant SLIPPAGE_PERCENTAGE = 100; // 100%
     TradeQuoteType private s_tradeQuoteType = TradeQuoteType.ExactInput;
     // ------------------------------------------------------- EVENTS ------------------------------------------
@@ -30,9 +34,10 @@ contract BaseSwap {
     event ExactInputQuoted(address indexed tokenIn, address indexed tokenOut, uint256 amount);
     event ExactOutputQuoted(address indexed tokenIn, address indexed tokenOut, uint256 amount);
 
-    constructor(address router_, address quoter_) {
+    constructor(address router_, address quoter_, address factory_) {
         s_swapRouter = ISwapRouterV2(router_);
         s_quoter = IQuoterV2(quoter_);
+        s_factoryAddr = factory_;
     }
 
     // ------------------------------------------------------- STRUCTS ------------------------------------------
@@ -86,6 +91,16 @@ contract BaseSwap {
         _;
     }
 
+    // ----------------------------------------------- INTERNAL & PRIVATE FUNCTIONS --------------------------------
+
+    function _checkPool(address tokenA, address tokenB, uint24 swapFee) internal returns(bool, address) {
+        IUniswapV3Factory factory = IUniswapV3Factory(s_factoryAddr);
+        address poolAddr = factory.getPool(tokenA, tokenB, swapFee);
+
+        if(poolAddr == address(0)) revert BaseSwap_PoolNotExist();
+        return(true, poolAddr);
+    }
+
     /**
      * @dev calling exactInput function for single or multi-hop swap
      *   @param params - see @ParamExactInput struct
@@ -100,6 +115,7 @@ contract BaseSwap {
     {
         bytes memory path = abi.encodePacked(params.tokenIn, params.swapFee, params.tokenOut);
         if (params.amountIn <= 0) revert BaseSwap_NotEnoughAmt(params.amountIn);
+
         TransferHelper.safeTransferFrom(params.tokenIn, msg.sender, address(this), params.amountIn);
         TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), params.amountIn);
 
@@ -111,6 +127,8 @@ contract BaseSwap {
             amountOutMinimum: params.amountOutMin
         });
 
+        // checking pool existence
+        _checkPool(params.tokenIn, params.tokenOut, params.swapFee);
         actualAmt = s_swapRouter.exactInput(swapParams);
         // handling the slippage tolerance calculations
         // if the price when the trade gets executed is higher than the time user places a trade, revert the tx
@@ -149,6 +167,8 @@ contract BaseSwap {
             amountOut: params.amountOut,
             amountInMaximum: params.amountInMax
         });
+         // checking pool existence
+        _checkPool(params.tokenIn, params.tokenOut, params.swapFee);
         // calling for swap
         inAmount = s_swapRouter.exactOutput(swapParams);
         // slippage tolerance handler

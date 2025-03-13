@@ -23,7 +23,7 @@ contract YoloTrade is Base, Ownable {
     event TradePaused(address indexed admin, uint256 timestamp);
     event TradeUnPaused(address indexed admin, uint256 timestamp);
 
-    constructor(address router_, address quoter_) Base(router_, quoter_) Ownable(msg.sender) {
+    constructor(address router_, address quoter_, address factory_) Base(router_, quoter_, factory_) Ownable(msg.sender) {
         s_owner = owner();
     }
 

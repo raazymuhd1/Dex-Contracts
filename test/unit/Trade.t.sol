@@ -20,7 +20,7 @@ contract TradeTest is BaseTradeTest {
         console.log(amountIn);
     }
 
-    function test_exactInputSwapZeroAddress() public {
+    function test_swapExactWithZeroAddress() public {
         uint256 amountIn = 50e6;
         uint24 slippage = 2; 
 
@@ -37,7 +37,7 @@ contract TradeTest is BaseTradeTest {
         trade.swapExactInput(params);
     }
 
-    function test_exactInputInvalidToken() public {
+    function test_swapExactWithInvalidToken() public {
         uint256 amountIn = 50e6;
         uint24 slippage = 2; 
 
@@ -56,7 +56,7 @@ contract TradeTest is BaseTradeTest {
 
     function test_gettingPool() public {
         vm.prank(USER);
-        address poolAddr = poolFactory.getPool(tokens.DAI, tokens.WETH, 3000);
+        address poolAddr = poolFactory.getPool(tokens.USDT, tokens.DAI, 3000);
         bytes memory sig = abi.encodeWithSignature("getPool(address,address,uint256)", tokens.DAI, tokens.WETH, 3000);
         (bool success, bytes memory data) = address(pool_factory).staticcall(sig);
         console.log("static call", success);
