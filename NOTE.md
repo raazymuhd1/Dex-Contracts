@@ -41,3 +41,17 @@ Example: Axelar, Wormhole (for some assets).
 `Centralization Risks`: If validators are centralized, they can be hacked.
 `Smart Contract Vulnerabilities`: Bridges are frequent targets of attacks (e.g., Ronin, Wormhole hacks).
 `Finality Issues`: Different chains have different consensus mechanisms and finality times.
+
+
+🔹 How Does a DEX Aggregator Work?
+A DEX (Decentralized Exchange) Aggregator is a smart contract that finds the best price for a token swap by splitting orders across multiple DEXs (like Uniswap, SushiSwap, Balancer, Curve, etc.).
+
+✅ Key Features of a DEX Aggregator:
+    - Fetches liquidity from multiple DEXs to get the best price.
+    - Splits the trade across multiple pools to optimize slippage.
+    - Minimizes gas fees by choosing the most efficient route.
+    - Protects against MEV attacks by allowing private transactions.
+💡 Real-World Examples
+    1. 1inch
+    2. Matcha (0x API)
+    3. Paraswap

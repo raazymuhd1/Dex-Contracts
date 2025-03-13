@@ -2,6 +2,7 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+gas_reports = ["*"] # show gas reports for all test contracts
 
 remappings = [
     "@forge-std/=lib/forge-std/src/",
