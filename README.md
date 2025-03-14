@@ -29,3 +29,10 @@
  - `User -> Tx -> Proxy Contract -> Implementation Contract`  
 
   When a developer trying to interact with an implementation contract, they can access it by passing an implementation contract addrss into a Proxy interface, that's because the `Proxy` contract will forwards all the functions call to the implementation contract, by trying to look the function the users trying to call, when those functions didn't exist in the `Proxy contract`, The `Proxy` contract will trigger a fallback function and from fallback function a `Proxy` forwarding the call to the implementation contract.
+
+
+  ### Uses Wormhole Bridge
+
+ - Resources for wormhole 
+  1. [contract-addresses](https://wormhole.com/docs/build/reference/contract-addresses/#__tabbed_2_2)
+  2. [wormhole-chain-ids](https://wormhole.com/docs/build/reference/chain-ids/#__tabbed_1_2)

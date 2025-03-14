@@ -6,7 +6,7 @@ import {IL2GatewayRouter} from "@scroll/contracts/L2/gateways/IL2GatewayRouter.s
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * @dev this contract uses a scroll bridge contract to bridge ERC20 and ETH to the dest chain.
+ * @dev this contract uses a scroll bridge contract to bridge ERC20 and ETH from MAINNET > SCROLL chain, and vice versa
  */
 
 abstract contract BaseTokenBridge {
