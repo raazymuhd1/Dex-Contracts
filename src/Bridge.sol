@@ -3,6 +3,11 @@ pragma solidity ^0.8.20;
 
 import {BaseTokenBridge} from "./base/BaseTokenBridge.sol";
 
+/**
+ * @title THIS BRIDGE USES SCROLL CONTRACT TO BRIDGE TOKEN FROM ETH MAINNET > SCROLL
+ * @author @0xKiddo
+ */
+
 contract Bridge is BaseTokenBridge {
     constructor(address l1GatewayRouter_, address l2GatewayRouter_)
         BaseTokenBridge(l1GatewayRouter_, l2GatewayRouter_)

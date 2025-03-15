@@ -36,3 +36,5 @@
  - Resources for wormhole 
   1. [contract-addresses](https://wormhole.com/docs/build/reference/contract-addresses/#__tabbed_2_2)
   2. [wormhole-chain-ids](https://wormhole.com/docs/build/reference/chain-ids/#__tabbed_1_2)
+  3. [wormhole-github](https://github.com/wormhole-foundation/wormhole/blob/main/ethereum/contracts/bridge/Bridge.sol)
+  4. [wormhole-sdk-contracts-github](https://github.com/wormhole-foundation/wormhole-solidity-sdk/blob/main/src/interfaces/IWormhole.sol)
