@@ -7,7 +7,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 abstract contract BridgeXBase {
 
     IWormholeBridge s_tokenBridge;
-    uint256 private constant ARBITER_FEE = 5000 wei;
+    uint256 private constant ARBITER_FEE = 0.002 ether;
     uint32 private s_txNonce;
 
     // 0xDB5492265f6038831E89f495670FF909aDe94bd9 tokenBridge contract on sepolia
@@ -19,14 +19,6 @@ abstract contract BridgeXBase {
     event TokenBridged(uint256 amount, address token, uint256 recipientChain, bytes32 recipient);
 
     // ---------------------------------------------- STRUCTS --------------------------------------------------------
-    struct TokenTransfer {
-        address token;
-        uint256 amount;
-        uint16 recipientChain;
-        address recipient;
-        uint256 arbiterFee;
-        uint32 nonce;
-    }
 
     struct TransferParams {
         address token;
@@ -49,6 +41,8 @@ abstract contract BridgeXBase {
         if(msg.sender == address(0)) revert("Invalid caller");
 
         bytes32 recipient_ = keccak256(abi.encodePacked(tokenParams.recipient));
+        if(tokenParams.recipient == address(0)) revert("Invalid Recipient");
+
         s_txNonce += 1;
         uint32 nonce_ = s_txNonce;
 
@@ -56,12 +50,13 @@ abstract contract BridgeXBase {
         IERC20(tokenParams.token).approve(address(s_tokenBridge), tokenParams.amount);
 
         // transfer token from source to destination chain.
+        uint256 seq = s_tokenBridge.attestToken(tokenParams.token, nonce_);
         uint64 txId = s_tokenBridge.transferTokens(
             tokenParams.token,
             tokenParams.amount,
             tokenParams.recipientChain,
             recipient_,
-            ARBITER_FEE,
+            0,
             nonce_
         );
 

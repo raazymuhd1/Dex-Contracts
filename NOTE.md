@@ -1,6 +1,8 @@
 ## Precomputed contract address
  - [create-2](https://www.cyfrin.io/glossary/precompute-contract-address-with-create2-solidity-code-example)
-
+ 
+### Struct Refresher
+  - struct type on two different contract are treated differently by solidity compiler, even they are look indentical.
 
 ### How Does It Work Internally?
 User Deposits Token on Source Chain
