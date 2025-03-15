@@ -83,7 +83,6 @@ contract YoloTrade is Base, Ownable {
         OnlyIfNotPaused
         returns (uint256 amountOut)
     {
-        if (params.amtIn <= 0) revert Base.BaseSwap_NotEnoughAmt(params.amtIn);
         Base.ParamExactInput memory swapParams = Base.ParamExactInput(
             params.tokenIn,
             params.tokenOut,

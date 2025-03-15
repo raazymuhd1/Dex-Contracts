@@ -10,16 +10,17 @@ import {IQuoterV2} from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.so
 import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import { BaseSwapError } from "../errors/BaseSwapErrors.sol";
 
 contract BaseSwap {
     // errors
-    error BaseSwap_InvalidCaller(address caller);
-    error BaseSwap_NotEnoughAmt(uint256 amount);
-    error BaseSwap_InvalidRecipient(address rec);
-    error BaseSwap_AmountLessThanExpected(uint256 amt, uint256 expectedAmt);
-    error BaseSwap_InvalidPair(address tokenA, address tokenB);
-    error BaseSwap_SlippageExceeded(uint256 amountOut);
-    error BaseSwap_PoolNotExist();
+    error BaseSwapError_InvalidCaller(address caller);
+    error BaseSwapError_NotEnoughAmt(uint256 amount);
+    error BaseSwapError_InvalidRecipient(address rec);
+    error BaseSwapError_AmountLessThanExpected(uint256 amt, uint256 expectedAmt);
+    error BaseSwapError_InvalidPair(address tokenA, address tokenB);
+    error BaseSwapError_SlippageExceeded(uint256 amountOut);
+    error BaseSwapError_PoolNotExist();
 
     ISwapRouterV2 private s_swapRouter;
     IQuoterV2 private s_quoter;
@@ -77,17 +78,17 @@ contract BaseSwap {
 
     // ------------------------------------------------------- MODIFIERS ------------------------------------------
     modifier ValidCaller() {
-        if (msg.sender == address(0)) revert BaseSwap_InvalidCaller(msg.sender);
+        if (msg.sender == address(0)) revert BaseSwapError_InvalidCaller(msg.sender);
         _;
     }
 
     modifier InvalidRecipient(address rec) {
-        if (rec == address(0)) revert BaseSwap_InvalidRecipient(rec);
+        if (rec == address(0)) revert BaseSwapError_InvalidRecipient(rec);
         _;
     }
 
     modifier InvalidPair(address tokenA, address tokenB) {
-        if (tokenA == address(0) || tokenB == address(0)) revert BaseSwap_InvalidPair(tokenA, tokenB);
+        if (tokenA == address(0) || tokenB == address(0)) revert BaseSwapError_InvalidPair(tokenA, tokenB);
         _;
     }
 
@@ -97,7 +98,7 @@ contract BaseSwap {
         IUniswapV3Factory factory = IUniswapV3Factory(s_factoryAddr);
         address poolAddr = factory.getPool(tokenA, tokenB, swapFee);
 
-        if(poolAddr == address(0)) revert BaseSwap_PoolNotExist();
+        if(poolAddr == address(0)) revert BaseSwapError_PoolNotExist();
         return(true, poolAddr);
     }
 
@@ -114,7 +115,7 @@ contract BaseSwap {
         returns (uint256 actualAmt)
     {
         bytes memory path = abi.encodePacked(params.tokenIn, params.swapFee, params.tokenOut);
-        if (params.amountIn <= 0) revert BaseSwap_NotEnoughAmt(params.amountIn);
+        if (params.amountIn <= 0) revert BaseSwapError_NotEnoughAmt(params.amountIn);
 
         TransferHelper.safeTransferFrom(params.tokenIn, msg.sender, address(this), params.amountIn);
         TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), params.amountIn);
@@ -137,7 +138,7 @@ contract BaseSwap {
 
         if (actualAmt < slippageTol) revert("slippage tolerance exceeded");
         // if user gets less than the slippage tolerance, then revert the tx
-        // if(actualAmt < expectedAmt) revert BaseSwap_SlippageExceeded(actualAmt);
+        // if(actualAmt < expectedAmt) revert BaseSwapError_SlippageExceeded(actualAmt);
         emit ExactInputSwapped(params.recipient, params.tokenIn, params.tokenOut);
     }
 
@@ -173,7 +174,7 @@ contract BaseSwap {
         inAmount = s_swapRouter.exactOutput(swapParams);
         // slippage tolerance handler
         uint256 slippageTol = (params.amountInMax * (SLIPPAGE_PERCENTAGE + params.slippageTolerance)) / 100;
-        if (inAmount > slippageTol) revert BaseSwap_SlippageExceeded(params.amountInMax);
+        if (inAmount > slippageTol) revert BaseSwapError_SlippageExceeded(params.amountInMax);
         if (inAmount < params.amountInMax) {
             // if the amountIn is less than maxAmountIn required by router, then approved the router to spend 0, and refund the amountIn to user
             TransferHelper.safeApprove(params.tokenIn, address(s_swapRouter), 0);
@@ -195,6 +196,7 @@ contract BaseSwap {
             (uint256 amountOut,,,) = s_quoter.quoteExactInput(path, params.amount);
             emit ExactInputQuoted(params.tokenIn, params.tokenOut, params.amount);
             return amountOut;
+            
         } else if (tradeType == 1) {
             bytes memory path = abi.encodePacked(params.tokenOut, params.swapFee, params.tokenIn);
             (uint256 amountInMax,,,) = s_quoter.quoteExactOutput(path, params.amount);

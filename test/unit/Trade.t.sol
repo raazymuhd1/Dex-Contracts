@@ -6,6 +6,7 @@ import { BaseSwap as Base } from "../../src/base/BaseSwap.sol";
 import {console} from "forge-std/Test.sol";
 import {YoloTrade} from "../../src/YoloTrade.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { BaseSwapError } from "../../src/errors/BaseSwapErrors.sol";
 
 contract TradeTest is BaseTradeTest {
 
@@ -33,7 +34,7 @@ contract TradeTest is BaseTradeTest {
             slippage
         );
         vm.startPrank(ZERO_ADDRESS);
-        vm.expectPartialRevert(Base.BaseSwap_InvalidCaller.selector);
+        vm.expectPartialRevert(Base.BaseSwapError_InvalidCaller.selector);
         trade.swapExactInput(params);
     }
 
@@ -50,7 +51,7 @@ contract TradeTest is BaseTradeTest {
             slippage
         );
         vm.startPrank(USER);
-        vm.expectPartialRevert(Base.BaseSwap_InvalidPair.selector);
+        vm.expectPartialRevert(Base.BaseSwapError_InvalidPair.selector);
         trade.swapExactInput(params);
     }
 
